@@ -12,32 +12,6 @@ const DIRECTIONS: [u32; 4] = [NORTH, WEST, SOUTH, EAST];
 
 const DEBUG_PRINTING : bool = true;
 
-fn print_state(cols: &Vec<Vec<char>>) {
-    if DEBUG_PRINTING {
-        for y in 0..cols[0].len() {
-            for x in 0..cols.len() {
-                print!("{} ", cols[x][y]);
-            }
-            println!()
-        }
-    }
-}
-fn print_distances(cols: &Vec<Vec<char>>, distances: &Vec<Vec<usize>>) {
-    if DEBUG_PRINTING {
-        for y in 0..distances[0].len() {
-            for x in 0..distances.len() {
-                if cols[x][y] == '#' {
-                    print!("# ");
-                }
-                else{
-                    print!("{} ", distances[x][y] % 10);
-                }
-            }
-            println!()
-        }
-    }
-}
-
 fn step(coords: (usize, usize), direction: u32, num_steps: usize, cols: &Vec<Vec<char>>, valid_char: char) -> Option<(usize, usize)> {
     if coords.0 >= num_steps && direction == WEST {
         if cols[coords.0 - num_steps][coords.1] != valid_char {
@@ -226,80 +200,29 @@ fn main() -> Result<(), Error> {
 
     let distances_from_middle : Vec<Vec<usize>> = get_distance_matrix_from(start, &cols);
 
-    println!("Distances from the middle:");
-    print_state(&cols);
-    print_distances(&cols, &distances_from_middle);
-
     let distances_from_n : Vec<Vec<usize>> = get_distance_matrix_from((start.0, 0), &cols);
-
-    println!("Finished distances_from_n.");
-
     let distances_from_w : Vec<Vec<usize>> = get_distance_matrix_from((0, start.1), &cols);
-
-    println!("Finished distances_from_w.");
-
     let distances_from_s : Vec<Vec<usize>> = get_distance_matrix_from((start.0, cols.len() - 1), &cols);
-
-    println!("Finished distances_from_s.");
-
     let distances_from_e : Vec<Vec<usize>> = get_distance_matrix_from((cols[0].len() - 1, start.1), &cols);
 
-    println!("Finished distances_from_e.");
-
     let distances_from_nw : Vec<Vec<usize>> = get_distance_matrix_from((0, 0), &cols);
-
-    println!("Finished distances_from_nw.");
-
     let distances_from_ne : Vec<Vec<usize>> = get_distance_matrix_from((0, cols.len() - 1), &cols);
-
-    println!("Finished distances_from_ne.");
-
     let distances_from_sw : Vec<Vec<usize>> = get_distance_matrix_from((cols[0].len() - 1, 0), &cols);
-
-    println!("Finished distances_from_sw.");
-
     let distances_from_se : Vec<Vec<usize>> = get_distance_matrix_from((cols[0].len() - 1, cols.len() - 1), &cols);
-
-    println!("Finished distances_from_se.");
-    println!("Finished all distance matrices.");
 
     let sol1 = distances_from_middle.iter().flatten().filter(|x| (**x <= 64) && (**x % 2 == 0)).count();
 
     let count_original = distances_from_middle.iter().flatten().filter(|x| **x != usize::MAX && (**x % 2 == steps % 2)).count() as u64;
 
-    println!("Finished count_original.");
-
     let count_north = go_straight(steps - (distances_from_middle[start.0][0] + 1), &distances_from_s);
-
-    println!("Finished count_north.");
-
     let count_south = go_straight(steps - (distances_from_middle[start.0][cols[0].len() - 1] + 1), &distances_from_n);
-
-    println!("Finished count_south.");
-
     let count_west = go_straight(steps - (distances_from_middle[0][start.1] + 1), &distances_from_e);
-
-    println!("Finished count_west.");
-
     let count_east = go_straight(steps - (distances_from_middle[cols.len() - 1][start.1] + 1), &distances_from_w);
 
-    println!("Finished count_east.");
-
     let count_nw = go_diagonal(steps - (distances_from_middle[0][0] + 2), &distances_from_se);
-
-    println!("Finished count_nw.");
-
     let count_ne = go_diagonal(steps - (distances_from_middle[0][cols.len() - 1] + 2), &distances_from_sw);
-
-    println!("Finished count_ne.");
-
     let count_sw = go_diagonal(steps - (distances_from_middle[cols.len() - 1][cols.len() - 1] + 2), &distances_from_ne);
-
-    println!("Finished count_sw.");
-
     let count_se = go_diagonal(steps - (distances_from_middle[cols.len() - 1][cols.len() - 1] + 2), &distances_from_nw);
-
-    println!("Finished count_se.");
 
     let sol2 = count_original
         + count_north + count_south + count_west + count_east
